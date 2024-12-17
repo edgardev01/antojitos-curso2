@@ -3,233 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Pedidos</title>
+    <title>Dashboard CRUD</title>
     <style>
-        body {
+        /* Reset y Estilo Global */
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
-            display: flex;
-            height: 100vh;
         }
 
-        .sidebar {
-            width: 200px;
-            background-color: #333;
-            color: white;
-            padding: 20px;
+        body {
+            background-color: #121212;
+            color: #f4f4f4;
+            line-height: 1.6;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        .sidebar-header {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        .sidebar button {
-            background: none;
-            color: white;
-            border: none;
-            padding: 10px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px 0;
-            transition: background 0.3s ease;
-        }
-
-        .sidebar button:hover {
-            background-color: #575757;
-        }
-
-        .main-content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
+        h1 {
             text-align: center;
+            margin-bottom: 20px;
+            color: #e76f51;
+            font-size: 2.5rem;
         }
 
-        th {
-            background-color: #f4f4f4;
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1000px;
         }
 
-        input {
-            width: 80%;
-            padding: 5px;
-            margin: 2px 0;
-            box-sizing: border-box;
+        .dashboard-item {
+            background-color: #1c1c1c;
+            border: 2px solid #e76f51;
+            color: #f4f4f4;
+            width: 250px;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        button {
-            padding: 5px 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            margin: 2px;
+        .dashboard-item a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #e76f51;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            opacity: 0.9;
+        .dashboard-item a:hover {
+            background-color: #c2452d;
         }
 
-        .btn-update {
-            background-color: #ffc107;
-            color: #fff;
+        .dashboard-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
         }
 
-        .btn-delete {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .btn-create {
-            background-color: #28a745;
-            color: #fff;
-            margin-top: 10px;
-        }
-
-        h3 {
-            margin-top: 10px;
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 1rem;
+            color: #ccc;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">Administrador</div>
-        <button onclick="loadPedidos()">Pedidos</button>
+    <h1>Panel de Administración</h1>
+    <div class="dashboard-container">
+        <div class="dashboard-item">
+            <h2>Clientes</h2>
+            <a href="clientes_crud.php">Gestionar Clientes</a>
+        </div>
+        <div class="dashboard-item">
+            <h2>Pagos</h2>
+            <a href="pagos_crud.php">Gestionar Pagos</a>
+        </div>
+        <div class="dashboard-item">
+            <h2>Pedidos</h2>
+            <a href="pedidos_crud.php">Gestionar Pedidos</a>
+        </div>
     </div>
 
-    <!-- Área principal -->
-    <div class="main-content" id="contentArea">
-        <!-- Área de Pedidos -->
-        <div id="pedidosArea"></div>
-    </div>
-
-    <script>
-        function loadPedidos() {
-            fetch('crud_pedidos.php', {
-                method: 'POST',
-                body: new URLSearchParams({ action: 'read' }),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    if (data.success) {
-                        renderPedidos(data.pedidos);
-                    } else {
-                        alert('Error al cargar pedidos');
-                    }
-                });
-        }
-
-        function renderPedidos(pedidos) {
-            const pedidosArea = document.getElementById('pedidosArea');
-            pedidosArea.innerHTML = `
-                <h3>Lista de Pedidos</h3>
-                <table>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Categoría</th>
-                        <th>Acciones</th>
-                    </tr>
-                    ${pedidos
-                        .map(
-                            (pedido) => `
-                        <tr>
-                            <td>${pedido.id_pedido}</td>
-                            <td><input value="${pedido.nombre_producto}" id="nombre_${pedido.id_pedido}"></td>
-                            <td><input value="${pedido.cantidad}" id="cantidad_${pedido.id_pedido}"></td>
-                            <td><input value="${pedido.precio}" id="precio_${pedido.id_pedido}"></td>
-                            <td><input value="${pedido.categoria}" id="categoria_${pedido.id_pedido}"></td>
-                            <td>
-                                <button class="btn-update" onclick="updatePedido(${pedido.id_pedido})">Actualizar</button>
-                                <button class="btn-delete" onclick="deletePedido(${pedido.id_pedido})">Eliminar</button>
-                            </td>
-                        </tr>`
-                        )
-                        .join('')}
-                </table>
-                <h3>Crear Nuevo Pedido</h3>
-                <input placeholder="Nombre Producto" id="new_nombre">
-                <input placeholder="Cantidad" id="new_cantidad" type="number">
-                <input placeholder="Precio" id="new_precio" type="number">
-                <input placeholder="Categoría" id="new_categoria">
-                <input placeholder="ID Cliente" id="new_id_cliente" type="number">
-                <button class="btn-create" onclick="createPedido()">Crear Pedido</button>
-            `;
-        }
-
-        function createPedido() {
-            const formData = new URLSearchParams({
-                action: 'create',
-                nombre_producto: document.getElementById('new_nombre').value,
-                cantidad: document.getElementById('new_cantidad').value,
-                precio: document.getElementById('new_precio').value,
-                categoria: document.getElementById('new_categoria').value,
-                id_cliente: document.getElementById('new_id_cliente').value,
-            });
-
-            fetch('crud_pedidos.php', {
-                method: 'POST',
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert(data.message);
-                    loadPedidos();
-                });
-        }
-
-        function updatePedido(id) {
-            const formData = new URLSearchParams({
-                action: 'update',
-                id_pedido: id,
-                nombre_producto: document.getElementById(`nombre_${id}`).value,
-                cantidad: document.getElementById(`cantidad_${id}`).value,
-                precio: document.getElementById(`precio_${id}`).value,
-                categoria: document.getElementById(`categoria_${id}`).value,
-            });
-
-            fetch('crud_pedidos.php', {
-                method: 'POST',
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert(data.message);
-                    loadPedidos();
-                });
-        }
-
-        function deletePedido(id) {
-            const formData = new URLSearchParams({
-                action: 'delete',
-                id_pedido: id,
-            });
-
-            fetch('crud_pedidos.php', {
-                method: 'POST',
-                body: formData,
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    alert(data.message);
-                    loadPedidos();
-                });
-        }
-    </script>
+    <footer>
+        &copy; 2024 Panel de Administración - Antojitos
+    </footer>
 </body>
 </html>
