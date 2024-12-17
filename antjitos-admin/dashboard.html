@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar button {
+            background: none;
+            color: white;
+            border: none;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px 0;
+            transition: background 0.3s ease;
+        }
+
+        .sidebar button:hover {
+            background-color: #575757;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        input {
+            width: 80%;
+            padding: 5px;
+            margin: 2px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            margin: 2px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .btn-update {
+            background-color: #ffc107;
+            color: #fff;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-create {
+            background-color: #28a745;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        h3 {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">Administrador</div>
+        <button onclick="loadPedidos()">Pedidos</button>
+    </div>
+
+    <!-- Área principal -->
+    <div class="main-content" id="contentArea">
+        <!-- Área de Pedidos -->
+        <div id="pedidosArea"></div>
+    </div>
+
+    <script>
+        function loadPedidos() {
+            fetch('crud_pedidos.php', {
+                method: 'POST',
+                body: new URLSearchParams({ action: 'read' }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        renderPedidos(data.pedidos);
+                    } else {
+                        alert('Error al cargar pedidos');
+                    }
+                });
+        }
+
+        function renderPedidos(pedidos) {
+            const pedidosArea = document.getElementById('pedidosArea');
+            pedidosArea.innerHTML = `
+                <h3>Lista de Pedidos</h3>
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Categoría</th>
+                        <th>Acciones</th>
+                    </tr>
+                    ${pedidos
+                        .map(
+                            (pedido) => `
+                        <tr>
+                            <td>${pedido.id_pedido}</td>
+                            <td><input value="${pedido.nombre_producto}" id="nombre_${pedido.id_pedido}"></td>
+                            <td><input value="${pedido.cantidad}" id="cantidad_${pedido.id_pedido}"></td>
+                            <td><input value="${pedido.precio}" id="precio_${pedido.id_pedido}"></td>
+                            <td><input value="${pedido.categoria}" id="categoria_${pedido.id_pedido}"></td>
+                            <td>
+                                <button class="btn-update" onclick="updatePedido(${pedido.id_pedido})">Actualizar</button>
+                                <button class="btn-delete" onclick="deletePedido(${pedido.id_pedido})">Eliminar</button>
+                            </td>
+                        </tr>`
+                        )
+                        .join('')}
+                </table>
+                <h3>Crear Nuevo Pedido</h3>
+                <input placeholder="Nombre Producto" id="new_nombre">
+                <input placeholder="Cantidad" id="new_cantidad" type="number">
+                <input placeholder="Precio" id="new_precio" type="number">
+                <input placeholder="Categoría" id="new_categoria">
+                <input placeholder="ID Cliente" id="new_id_cliente" type="number">
+                <button class="btn-create" onclick="createPedido()">Crear Pedido</button>
+            `;
+        }
+
+        function createPedido() {
+            const formData = new URLSearchParams({
+                action: 'create',
+                nombre_producto: document.getElementById('new_nombre').value,
+                cantidad: document.getElementById('new_cantidad').value,
+                precio: document.getElementById('new_precio').value,
+                categoria: document.getElementById('new_categoria').value,
+                id_cliente: document.getElementById('new_id_cliente').value,
+            });
+
+            fetch('crud_pedidos.php', {
+                method: 'POST',
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert(data.message);
+                    loadPedidos();
+                });
+        }
+
+        function updatePedido(id) {
+            const formData = new URLSearchParams({
+                action: 'update',
+                id_pedido: id,
+                nombre_producto: document.getElementById(`nombre_${id}`).value,
+                cantidad: document.getElementById(`cantidad_${id}`).value,
+                precio: document.getElementById(`precio_${id}`).value,
+                categoria: document.getElementById(`categoria_${id}`).value,
+            });
+
+            fetch('crud_pedidos.php', {
+                method: 'POST',
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert(data.message);
+                    loadPedidos();
+                });
+        }
+
+        function deletePedido(id) {
+            const formData = new URLSearchParams({
+                action: 'delete',
+                id_pedido: id,
+            });
+
+            fetch('crud_pedidos.php', {
+                method: 'POST',
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    alert(data.message);
+                    loadPedidos();
+                });
+        }
+    </script>
+</body>
+</html>
